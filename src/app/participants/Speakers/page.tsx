@@ -1,0 +1,181 @@
+"use client"
+import Link from "next/link"
+import React, { useEffect, useState } from "react"
+import { FaArrowLeft, FaFilter, FaSearch } from "react-icons/fa"
+import Image from "next/image"
+import { useSelector } from "react-redux"
+import { RootState } from "@/lib/store/store"
+import api from "@/config/api"
+
+const tagColors: Record<string, string> = {
+  Expert: "bg-blue-200 text-blue-800",
+  Keynote: "bg-green-200 text-green-800",
+  Technology: "bg-purple-200 text-purple-800",
+  Workshop: "bg-pink-200 text-pink-800",
+  Speaker: "bg-red-200 text-red-800",
+  Research: "bg-yellow-200 text-yellow-800",
+  AI: "bg-indigo-200 text-indigo-800",
+  ML: "bg-teal-200 text-teal-800",
+  NLP: "bg-orange-200 text-orange-800",
+  Cloud: "bg-sky-200 text-sky-800",
+}
+
+export default function SpeakersPage() {
+  const eventId = useSelector((state: RootState) => state.event.id)
+  const [speakers, setSpeakers] = useState<any[]>([])
+  const [activeFilter, setActiveFilter] = useState("All")
+  const [searchQuery, setSearchQuery] = useState("")
+
+  useEffect(() => {
+    if (!eventId) return
+    const fetchSpeakers = async () => {
+      try {
+        const res = await api.get(`/speakers/event/${eventId}/short-info`)
+        setSpeakers(res.data)
+      } catch (error) {
+        console.error("Error fetching speakers:", error)
+      }
+    }
+    fetchSpeakers()
+  }, [eventId])
+
+  const filteredSpeakers = speakers.filter((speaker) => {
+    const matchesFilter =
+      activeFilter === "All" || speaker.tags.includes(activeFilter)
+    const matchesSearch =
+      speaker.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      speaker.bio.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      speaker.expertise.some((exp: string) =>
+        exp.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    return matchesFilter && matchesSearch
+  })
+
+  return (
+    <>
+      <div className="flex flex-col gap-10 p-5 max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center gap-10">
+          <Link href="/participants/Home">
+            <FaArrowLeft className="text-red-800 w-[20px] h-[20px] cursor-pointer" />
+          </Link>
+          <h1 className="text-2xl font-medium text-gray-900">Speakers</h1>
+        </div>
+
+        {/* Search + Filters */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 border border-gray-300 rounded-lg p-3 w-1/2">
+            <FaSearch className="text-red-500 w-[20px] h-[20px]" />
+            <input
+              type="text"
+              placeholder="Search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1 outline-none text-gray-400"
+            />
+          </div>
+          {["All", "Expert", "Keynote", "Technology", "Workshop"].map((tag) => (
+            <button
+              key={tag}
+              onClick={() => setActiveFilter(tag)}
+              className={`px-6 py-3 rounded-lg ${activeFilter === tag
+                ? "bg-red-700 text-white font-bold"
+                : "border border-gray-300 text-gray-900"
+                }`}
+            >
+              {tag}
+            </button>
+          ))}
+          <div className="border border-gray-300 rounded-lg p-3">
+            <FaFilter className="text-red-500 w-[20px]" />
+          </div>
+        </div>
+
+        {/* Count */}
+        <p className="text-lg font-medium text-gray-900">
+          {filteredSpeakers.length} Speakers Showing
+        </p>
+
+        {/* Speakers List */}
+        <div className="flex flex-col gap-6">
+          {filteredSpeakers.map((speaker, index) => (
+            <Link
+              key={index}
+              href={`/participants/SpeakerDetails/${speaker.id}`}
+              className="block"
+            >
+              <div className="bg-white border border-gray-300 rounded-2xl p-6 shadow-sm hover:shadow-md transition">
+                <div className="flex gap-6">
+                  {/* Use full URL to display the image */}
+                  <img
+                    src={`http://localhost:5000/files/${speaker.user.file}`}
+                    alt={speaker.user.name}
+                    className="w-24 h-24 rounded-full object-cover"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-4 flex-wrap">
+                      <h2 className="text-xl font-semibold text-gray-900">
+                        {speaker.user.name}
+                      </h2>
+
+                      {speaker.designations.map((d: string, i: number) => (
+                        <div key={i} className="flex items-center gap-2">
+                          <div className="w-1 h-1 bg-red-700 rounded-full" />
+                          <p className="text-base text-gray-900">{d}</p>
+                        </div>
+                      ))}
+
+                      <div className="ml-auto flex gap-2 flex-wrap">
+                        {speaker.tags[0] && (
+                          <span
+                            className={`px-3 py-1 rounded-full text-sm font-medium ${tagColors[speaker.tags[0]] ?? "bg-gray-200 text-gray-800"
+                              }`}
+                          >
+                            {speaker.tags[0]}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="bg-red-200 p-2 rounded-full">
+                        <p className="text-sm text-red-700">{speaker.sessionCount} Sessions</p>
+                      </div>
+
+                      <div className="bg-red-200 p-2 rounded-full">
+                        <svg
+                          className="w-6 h-6 text-red-700"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      {speaker.bio}
+                    </p>
+
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <Image
+        src="/images/line.png"
+        alt="Line"
+        width={1450}
+        height={127}
+        className="absolute"
+      />
+    </>
+  )
+}
