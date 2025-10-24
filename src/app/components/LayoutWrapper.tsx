@@ -10,9 +10,9 @@ export default function LayoutWrapper({
 }) {
   const pathname = usePathname()?.toLowerCase()
 
-  // Define pages where you don't want the navbar
-  const hideNavbarPaths = ["/authentication/signup", "/authentication/signin" , "/"]
-  const hideNavbar = hideNavbarPaths.some(path => pathname?.startsWith(path))
+  const hideNavbarPaths = ["/authentication/signup", "/authentication/signin"]
+  
+  const hideNavbar = hideNavbarPaths.some(path => pathname?.startsWith(path)) || pathname === "/"
 
   return (
     <>

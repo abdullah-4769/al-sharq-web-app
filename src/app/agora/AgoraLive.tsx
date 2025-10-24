@@ -20,6 +20,7 @@ const AgoraLiveStream = () => {
   
   const [isAudioEnabled, setIsAudioEnabled] = useState(true)
   const [isVideoEnabled, setIsVideoEnabled] = useState(false)
+  const [isScreenSharing, setIsScreenSharing] = useState(false)
   
   const [showParticipants, setShowParticipants] = useState(false)
   const [showChat, setShowChat] = useState(false)
@@ -29,6 +30,7 @@ const AgoraLiveStream = () => {
   const [participants, setParticipants] = useState<any[]>([])
   const [messages, setMessages] = useState<any[]>([])
   const [messageInput, setMessageInput] = useState('')
+  const [unreadCount, setUnreadCount] = useState(0)
   
   const localVideoRef = useRef<HTMLDivElement>(null)
   const screenShareRef = useRef<HTMLDivElement>(null)
@@ -172,6 +174,13 @@ const AgoraLiveStream = () => {
               time: new Date().toLocaleTimeString(),
               uid: message.uid
             }])
+            // Increment unread count only if chat is closed
+            setShowChat(prevShowChat => {
+              if (!prevShowChat) {
+                setUnreadCount(prev => prev + 1)
+              }
+              return prevShowChat
+            })
           }
         } catch (err) {
           console.error('Failed to parse stream message:', err)
@@ -267,6 +276,8 @@ const AgoraLiveStream = () => {
     setParticipants([])
     remoteUsersRef.current.clear()
     userNamesRef.current.clear()
+    setIsScreenSharing(false)
+    setUnreadCount(0)
     
     if (localVideoRef.current) {
       localVideoRef.current.innerHTML = ''
@@ -290,6 +301,11 @@ const AgoraLiveStream = () => {
   }
 
   const toggleVideo = async () => {
+    if (isScreenSharing) {
+      alert('Stop screen sharing first to enable camera')
+      return
+    }
+
     const newState = !isVideoEnabled
     
     if (newState) {
@@ -348,8 +364,13 @@ const AgoraLiveStream = () => {
     try {
       const screenTrack = await AgoraRTC.createScreenVideoTrack({})
       
-      if (localTracksRef.current.length > 1) {
+      // Stop and unpublish video track if exists
+      if (localTracksRef.current.length > 1 && localTracksRef.current[1]) {
         await clientRef.current.unpublish(localTracksRef.current[1])
+        localTracksRef.current[1].close()
+        if (localVideoRef.current) {
+          localVideoRef.current.innerHTML = ''
+        }
       }
       
       await clientRef.current.publish(screenTrack)
@@ -365,33 +386,43 @@ const AgoraLiveStream = () => {
         localTracksRef.current[1] = screenTrack
       }
       
+      // Listen for screen share stop event
+      screenTrack.on('track-ended', () => {
+        stopScreenShare()
+      })
+      
+      setIsScreenSharing(true)
+      setIsVideoEnabled(false)
+      
+      setParticipants(prev => prev.map(p => 
+        p.isLocal ? { ...p, videoEnabled: false } : p
+      ))
+      
       addSystemMessage('Screen sharing started')
     } catch (err: any) {
       console.error('Screen share failed:', err)
-      alert('Screen sharing permission denied')
+      if (err.code === 'PERMISSION_DENIED' || err.name === 'NotAllowedError') {
+        alert('Screen sharing permission denied')
+      } else {
+        alert('Failed to start screen sharing')
+      }
     }
   }
 
   const stopScreenShare = async () => {
     if (!clientRef.current) return
     try {
-      if (localTracksRef.current.length > 1) {
+      if (localTracksRef.current.length > 1 && localTracksRef.current[1]) {
         await clientRef.current.unpublish(localTracksRef.current[1])
         localTracksRef.current[1].close()
+        localTracksRef.current = [localTracksRef.current[0]]
         
-        if (isVideoEnabled) {
-          const videoTrack = await AgoraRTC.createCameraVideoTrack()
-          await clientRef.current.publish(videoTrack)
-          localTracksRef.current[1] = videoTrack
-          
-          if (localVideoRef.current) {
-            localVideoRef.current.innerHTML = ''
-            videoTrack.play(localVideoRef.current)
-          }
-        } else {
-          localTracksRef.current = [localTracksRef.current[0]]
+        if (screenShareRef.current) {
+          screenShareRef.current.innerHTML = ''
         }
       }
+      
+      setIsScreenSharing(false)
       
       addSystemMessage('Screen sharing stopped')
     } catch (err) {
@@ -417,16 +448,32 @@ const AgoraLiveStream = () => {
     setMessageInput('')
   }
 
+  const toggleChatPanel = () => {
+    setShowChat(!showChat)
+    // Reset unread count when opening chat
+    if (!showChat) {
+      setUnreadCount(0)
+    }
+  }
+
   const renderLocalVideoContainer = () => {
     return (
       <div className="relative bg-black rounded-lg overflow-hidden aspect-video">
-        <div 
-          ref={localVideoRef}
-          className="w-full h-full video-container"
-        />
+        {isScreenSharing ? (
+          <div 
+            ref={screenShareRef}
+            className="w-full h-full video-container"
+          />
+        ) : (
+          <div 
+            ref={localVideoRef}
+            className="w-full h-full video-container"
+          />
+        )}
         
         <div className="absolute bottom-4 left-4 bg-black/70 px-3 py-2 rounded-lg">
           <p className="font-semibold">{userName} (You)</p>
+          {isScreenSharing && <p className="text-xs text-green-400">Screen Sharing</p>}
         </div>
         
         {!isAudioEnabled && (
@@ -435,7 +482,7 @@ const AgoraLiveStream = () => {
           </div>
         )}
         
-        {!isVideoEnabled && (
+        {!isVideoEnabled && !isScreenSharing && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
             <div className="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center text-4xl">
               {userName[0]?.toUpperCase()}
@@ -575,10 +622,10 @@ const AgoraLiveStream = () => {
                 </button>
 
                 <button
-                  onClick={startScreenShare}
-                  className="p-4 rounded-full bg-gray-700 hover:bg-gray-600"
+                  onClick={isScreenSharing ? stopScreenShare : startScreenShare}
+                  className={`p-4 rounded-full ${isScreenSharing ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-600'}`}
                 >
-                  <Monitor size={24} />
+                  {isScreenSharing ? <MonitorOff size={24} /> : <Monitor size={24} />}
                 </button>
 
                 <button
@@ -589,13 +636,13 @@ const AgoraLiveStream = () => {
                 </button>
 
                 <button
-                  onClick={() => setShowChat(!showChat)}
+                  onClick={toggleChatPanel}
                   className="p-4 rounded-full bg-gray-700 hover:bg-gray-600 relative"
                 >
                   <MessageSquare size={24} />
-                  {messages.filter(m => m.type === 'user').length > 0 && (
+                  {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-600 text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                      {messages.filter(m => m.type === 'user').length}
+                      {unreadCount}
                     </span>
                   )}
                 </button>
@@ -626,7 +673,7 @@ const AgoraLiveStream = () => {
                     </div>
                     <div className="flex-1">
                       <p className="font-semibold">{p.name} {p.isLocal && '(You)'}</p>
-                      <p className="text-xs text-gray-400">UID: {p.uid}</p>
+                   
                     </div>
                     <div className="flex gap-1">
                       {p.audioEnabled ? <Mic size={16} /> : <MicOff size={16} className="text-red-500" />}
