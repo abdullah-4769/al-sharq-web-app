@@ -4,18 +4,18 @@ import { FaArrowRight, FaCalendarAlt, FaClock, FaPlay, FaSearch, FaStar, FaLock,
 import { FaMessage, FaCalendar as FaCalendarIcon } from "react-icons/fa6"
 import Image from "next/image"
 import Link from "next/link"
-import { useSelector } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
 import { RootState } from "@/lib/store/store"
 import api from "@/config/api"
 import { useRouter } from "next/navigation"
+import { setEventId } from "@/lib/store/features/event/eventSlice"
 
 const filters = ["Daily", "Weekly", "10 Days", "90 Days", "All Time"]
 
 export default function SpeakerSessions() {
   const router = useRouter()
-  const userId = useSelector((state: RootState) => state.user.userId)
-
-   const sponsorId = useSelector((state: RootState) => state.sponsor.sponsorId)
+  const dispatch = useDispatch()
+  const sponsorId = useSelector((state: RootState) => state.sponsor.sponsorId)
 
   const [events, setEvents] = useState<any[]>([])
   const [filteredEvents, setFilteredEvents] = useState<any[]>([])
@@ -24,13 +24,11 @@ export default function SpeakerSessions() {
   const [stats, setStats] = useState({ total: 0, ongoing: 0, scheduled: 0 })
 
   useEffect(() => {
-    if (!userId) return
+    if (!sponsorId) return
     const fetchEvents = async () => {
       try {
-        console.log(`sponerid ${sponsorId}`)
         const res = await api.get(`/sponsors/sponsor/${sponsorId}/sessions`)
         const data = Array.isArray(res.data.sessions) ? res.data.sessions : []
-              console.log(data)
         setEvents(data)
         setFilteredEvents(data)
         setStats({
@@ -38,25 +36,23 @@ export default function SpeakerSessions() {
           ongoing: res.data.ongoing || 0,
           scheduled: res.data.scheduled || 0
         })
-      } catch {
+      } catch (err) {
         setEvents([])
         setFilteredEvents([])
         setStats({ total: 0, ongoing: 0, scheduled: 0 })
       }
     }
     fetchEvents()
-  }, [userId])
+  }, [sponsorId])
 
   useEffect(() => {
     let filtered = [...events]
+    const now = new Date()
 
     if (searchText) {
-      filtered = filtered.filter(ev =>
-        ev.title.toLowerCase().includes(searchText.toLowerCase())
-      )
+      filtered = filtered.filter(ev => ev.title.toLowerCase().includes(searchText.toLowerCase()))
     }
 
-    const now = new Date()
     if (activeFilter === "Daily") {
       filtered = filtered.filter(ev => new Date(ev.startTime).toDateString() === now.toDateString())
     } else if (activeFilter === "Weekly") {
@@ -106,8 +102,9 @@ export default function SpeakerSessions() {
     )
   }
 
-  const handleViewAll = (sessionId: number) => {
-    router.push(`/participants/SessionDetail/${sessionId}`)
+  const handleViewAll = (sessionId: number, eventId: number) => {
+    dispatch(setEventId(eventId))
+    router.push(`/participants/SessionDetail1/${sessionId}`)
   }
 
   const handleSponsorClick = () => {
@@ -116,6 +113,7 @@ export default function SpeakerSessions() {
 
   return (
     <div className="p-6 md:p-10 min-h-screen font-sans">
+      {/* Top cards: Chats and Sponsor */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         <div className="flex-1 flex items-center justify-between p-6 gap-3 h-24 bg-[#FFEEEE] border border-[#D4D4D4] shadow-sm rounded-3xl">
           <div className="flex items-center gap-3">
@@ -129,7 +127,7 @@ export default function SpeakerSessions() {
           </Link>
         </div>
 
-        <div className="flex-1 flex items-center justify-between p-6 gap-3 h-24 bg-[#FFFAEE] border border-[#D4D4D4] shadow-[0px_4px_110.3px_rgba(68,68,68,0.05)] rounded-[20px] cursor-pointer" onClick={handleSponsorClick}>
+        <div className="flex-1 flex items-center justify-between p-6 gap-3 h-24 bg-[#FFFAEE] border border-[#D4D4D4] shadow rounded-[20px] cursor-pointer" onClick={handleSponsorClick}>
           <div className="flex items-center gap-3">
             <div className="w-[45px] h-[45px] bg-[#FEF9C3] rounded-[7.5px] flex items-center justify-center">
               <FaStar className="text-[#CA8A04] text-lg" />
@@ -140,6 +138,7 @@ export default function SpeakerSessions() {
         </div>
       </div>
 
+      {/* Filters and Search */}
       <div className="flex flex-col md:flex-row md:flex-wrap justify-between items-center gap-4 mb-6">
         <div className="flex bg-white border border-gray-300 rounded-md px-3 py-2 w-full md:w-96">
           <FaSearch className="text-red-900 mr-2" />
@@ -163,17 +162,9 @@ export default function SpeakerSessions() {
             </button>
           ))}
         </div>
-
-        <div className="flex items-center border border-gray-300 bg-white px-3 py-2 rounded-md text-sm text-gray-700">
-          <FaCalendarAlt className="mr-2 text-red-500" />
-          Jan 2024 - Dec 2024
-        </div>
-
-        <div>
-          <img src="/images/Frame 1000004593.png" alt="" />
-        </div>
       </div>
 
+      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div className="flex flex-col items-start p-6 bg-white border border-[#E6E6E6] shadow rounded-3xl">
           <div className="flex items-center gap-4 w-full">
@@ -212,6 +203,7 @@ export default function SpeakerSessions() {
         </div>
       </div>
 
+      {/* Session Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredEvents.map((event, index) => {
           const now = new Date()
@@ -254,7 +246,7 @@ export default function SpeakerSessions() {
                   <div className="flex items-center space-x-2">
                     {event.speakers[0].file && (
                       <Image
-                        src={`/uploads/${event.speakers[0].file}.png`}
+                        src={event.speakers[0].file.startsWith("http") ? event.speakers[0].file : `/uploads/${event.speakers[0].file}.png`}
                         alt=""
                         width={24}
                         height={24}
@@ -291,7 +283,7 @@ export default function SpeakerSessions() {
 
               <button
                 className="w-full bg-[#9B2033] text-white py-2 text-sm rounded-md hover:bg-red-700 transition"
-                onClick={() => handleViewAll(event.id)}
+                onClick={() => handleViewAll(event.id, event.eventId)}
               >
                 View Details
               </button>
@@ -299,8 +291,6 @@ export default function SpeakerSessions() {
           )
         })}
       </div>
-
-      <Image src="/images/line.png" alt="Line" width={1729} height={127} className="absolute" />
     </div>
   )
 }

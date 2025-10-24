@@ -3,8 +3,9 @@ import Link from "next/link"
 import React, { useEffect, useState } from "react"
 import { FaArrowLeft, FaFilter, FaSearch } from "react-icons/fa"
 import Image from "next/image"
-import { useSelector } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
 import { RootState } from "@/lib/store/store"
+import { setSpeakerId } from "@/lib/store/features/speaker/speakerSlice"
 import api from "@/config/api"
 
 const tagColors: Record<string, string> = {
@@ -25,6 +26,7 @@ export default function SpeakersPage() {
   const [speakers, setSpeakers] = useState<any[]>([])
   const [activeFilter, setActiveFilter] = useState("All")
   const [searchQuery, setSearchQuery] = useState("")
+  const dispatch = useDispatch()
 
   useEffect(() => {
     if (!eventId) return
@@ -54,7 +56,6 @@ export default function SpeakersPage() {
   return (
     <>
       <div className="flex flex-col gap-10 p-5 max-w-7xl mx-auto">
-        {/* Header */}
         <div className="flex items-center gap-10">
           <Link href="/participants/Home">
             <FaArrowLeft className="text-red-800 w-[20px] h-[20px] cursor-pointer" />
@@ -62,7 +63,6 @@ export default function SpeakersPage() {
           <h1 className="text-2xl font-medium text-gray-900">Speakers</h1>
         </div>
 
-        {/* Search + Filters */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-3 border border-gray-300 rounded-lg p-3 w-1/2">
             <FaSearch className="text-red-500 w-[20px] h-[20px]" />
@@ -91,22 +91,20 @@ export default function SpeakersPage() {
           </div>
         </div>
 
-        {/* Count */}
         <p className="text-lg font-medium text-gray-900">
           {filteredSpeakers.length} Speakers Showing
         </p>
 
-        {/* Speakers List */}
         <div className="flex flex-col gap-6">
           {filteredSpeakers.map((speaker, index) => (
             <Link
               key={index}
               href={`/participants/SpeakerDetails/${speaker.id}`}
+              onClick={() => dispatch(setSpeakerId(speaker.id))}
               className="block"
             >
               <div className="bg-white border border-gray-300 rounded-2xl p-6 shadow-sm hover:shadow-md transition">
                 <div className="flex gap-6">
-                  {/* Use full URL to display the image */}
                   <img
                     src={`http://localhost:5000/files/${speaker.user.file}`}
                     alt={speaker.user.name}
@@ -117,14 +115,12 @@ export default function SpeakersPage() {
                       <h2 className="text-xl font-semibold text-gray-900">
                         {speaker.user.name}
                       </h2>
-
                       {speaker.designations.map((d: string, i: number) => (
                         <div key={i} className="flex items-center gap-2">
                           <div className="w-1 h-1 bg-red-700 rounded-full" />
                           <p className="text-base text-gray-900">{d}</p>
                         </div>
                       ))}
-
                       <div className="ml-auto flex gap-2 flex-wrap">
                         {speaker.tags[0] && (
                           <span
@@ -137,30 +133,15 @@ export default function SpeakersPage() {
                       </div>
 
                       <div className="bg-red-200 p-2 rounded-full">
-                        <p className="text-sm text-red-700">{speaker.sessionCount} Sessions</p>
-                      </div>
-
-                      <div className="bg-red-200 p-2 rounded-full">
-                        <svg
-                          className="w-6 h-6 text-red-700"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                          />
-                        </svg>
+                        <p className="text-sm text-red-700">
+                          {speaker.sessionCount} Sessions
+                        </p>
                       </div>
                     </div>
 
                     <p className="text-sm text-gray-600 leading-relaxed">
                       {speaker.bio}
                     </p>
-
                   </div>
                 </div>
               </div>

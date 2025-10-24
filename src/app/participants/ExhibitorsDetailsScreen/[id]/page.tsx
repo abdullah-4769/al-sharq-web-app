@@ -7,7 +7,7 @@ import { FaShop } from 'react-icons/fa6'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import api from '@/config/api'
-import SpeakerSession from '@/app/components/SpeakerSession'
+import RelatedSessionsGrid from "@/app/components/relatedsession"
 
 const LiveLocation = dynamic(() => import('@/app/components/LiveLocation'), { ssr: false })
 
@@ -98,7 +98,11 @@ const ExhibitorDetailsScreen: React.FC<PageProps> = ({ params }) => {
   return (
     <div className="relative w-full h-screen">
       {/* Header */}
-      <div className="absolute w-[1440px] h-[231px] bg-cover bg-center" style={{ backgroundImage: 'url(/images/building.jpg)' }}>
+<div
+  className="absolute w-[1440px] h-[231px] bg-cover bg-center"
+  style={{ backgroundImage: `url(${exhibitor.picUrl})` }}
+>
+
         <div className="absolute w-[40px] h-[40px] left-[20px] top-[20px] rounded-full flex items-center justify-center cursor-pointer">
           <Link href="/participants/Sponsors&Exhibitors">
             <FaArrowLeft className="text-red-800 w-[20px] h-[20px]" />
@@ -212,11 +216,7 @@ const ExhibitorDetailsScreen: React.FC<PageProps> = ({ params }) => {
           <span className="text-base font-medium text-[#282828] cursor-pointer">View All</span>
         </div>
 
-        <div className="flex flex-row gap-6 w-full h-[419px]">
-          <SpeakerSession title="Exploring the role of diplomacy and collaboration in shaping future policies" time="2:00 PM – 3:30 PM" duration="90 minutes" room="Hall B" type="Female" typeColor="#91C6FF" typeTextColor="#1E40AF" />
-          <SpeakerSession title="Exploring the role of diplomacy and collaboration in shaping future policies" time="10:00 AM – 11:30 AM" duration="90 minutes" room="Hall B" type="Female" typeColor="#E9EB87" typeTextColor="#606C38" />
-          <SpeakerSession title="Exploring the role of diplomacy and collaboration in shaping future policies" time="4:00 PM – 5:00 PM" duration="90 minutes" room="Room C2" type="Female" typeColor="#F3E8FF" typeTextColor="#6B21A8" />
-        </div>
+        <RelatedSessionsGrid />
 
         {/* Social Media */}
         <div className="flex flex-row gap-6 mt-8">
@@ -243,7 +243,7 @@ const ExhibitorDetailsScreen: React.FC<PageProps> = ({ params }) => {
 
       </div>
   
-  <Image src="/images/line.png" alt="Logo" width={1729} height={127} className="absolute top-[1700px]" />
+  <Image src="/images/line.png" alt="Logo" width={1729} height={127} className="absolute bottom-[2300px]" />
   
     </div>
   )

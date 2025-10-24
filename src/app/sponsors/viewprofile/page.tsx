@@ -9,6 +9,7 @@ import { useSelector } from 'react-redux'
 import { RootState } from '@/lib/store/store'
 import { useRouter } from 'next/navigation'
 import { QRCodeCanvas as QRCode } from 'qrcode.react'
+import LogoutButton from './../../components/LogoutButton'
 
 const SponsorProfileView: React.FC = () => {
   const [sponsor, setSponsor] = useState<any | null>(null)
@@ -67,36 +68,38 @@ const SponsorProfileView: React.FC = () => {
           )}
 
           {/* Edit and QR buttons at top-right */}
-          <div className="absolute top-4 right-4 flex gap-2">
-            <button
-              type="button"
-              onClick={() => window.location.href = '/sponsors/edit'}
-              className="p-2 bg-red-600 text-white rounded-full shadow hover:bg-red-700"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-4 h-4"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652l-9.193 9.193a4.5 4.5 0 01-1.897 1.13l-3.323.94.94-3.323a4.5 4.5 0 011.13-1.897l9.193-9.193z"
-                />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 7.125L16.875 4.5" />
-              </svg>
-            </button>
+         <div className="absolute top-4 right-4 flex gap-2">
+  <button
+    type="button"
+    onClick={() => window.location.href = '/sponsors/edit'}
+    className="p-2 bg-red-600 text-white rounded-full shadow hover:bg-red-700"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+      className="w-4 h-4"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652l-9.193 9.193a4.5 4.5 0 01-1.897 1.13l-3.323.94.94-3.323a4.5 4.5 0 011.13-1.897l9.193-9.193z"
+      />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 7.125L16.875 4.5" />
+    </svg>
+  </button>
 
-            <button
-              onClick={() => setShowQR(true)}
-              className="p-2 bg-gray-800 text-white rounded-full shadow hover:bg-gray-900"
-            >
-              QR
-            </button>
-          </div>
+  <button
+    onClick={() => setShowQR(true)}
+    className="p-2 bg-gray-800 text-white rounded-full shadow hover:bg-gray-900"
+  >
+    QR
+  </button>
+
+  <LogoutButton />
+</div>
         </div>
 
         {/* Main Card */}

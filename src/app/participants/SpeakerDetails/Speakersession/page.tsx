@@ -142,7 +142,7 @@ export default function SpeakerSessions() {
               </div>
 
               <Link
-                href={session.id ? `/participants/SessionDetail/${session.id}` : "#"}
+                href={session.id ? `/participants/SessionDetail1/${session.id}` : "#"}
                 className="w-full mt-3"
               >
                 <button className="w-full bg-[#9B2033] text-white py-2 text-sm rounded-md hover:bg-[#801c2a] transition">

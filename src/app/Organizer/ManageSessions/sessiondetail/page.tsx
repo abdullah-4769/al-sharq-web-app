@@ -15,25 +15,25 @@ export default function SessionPage() {
     const userId = useSelector((state: RootState) => state.user.userId)
     const eventId = useSelector((state: RootState) => state.event.id)
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const id = localStorage.getItem('sessionId')
-            if (!id) {
-                setLoading(false)
-                return
-            }
-            try {
-                const res = await api.get(`/sessions/detail/${id}`)
-                setSession(res.data)
-            } catch {
-                setSession(null)
-            } finally {
-                localStorage.removeItem('sessionId')
-                setLoading(false)
-            }
+useEffect(() => {
+    const fetchData = async () => {
+        const id = localStorage.getItem('sessionId')
+        if (!id) {
+            setLoading(false)
+            return
         }
-        fetchData()
-    }, [])
+        try {
+            const res = await api.get(`/sessions/detail/${id}`)
+            setSession(res.data)
+        } catch {
+            setSession(null)
+        } finally {
+            setLoading(false)
+        }
+    }
+    fetchData()
+}, [])
+
 
     const handleBookmark = async () => {
         if (!userId || !eventId || !session?.id) return

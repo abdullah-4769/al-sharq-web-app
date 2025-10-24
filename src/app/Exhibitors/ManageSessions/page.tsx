@@ -4,17 +4,18 @@ import { FaArrowRight, FaCalendarAlt, FaClock, FaPlay, FaSearch, FaStar, FaLock,
 import { FaMessage, FaCalendar as FaCalendarIcon } from "react-icons/fa6"
 import Image from "next/image"
 import Link from "next/link"
-import { useSelector } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
 import { RootState } from "@/lib/store/store"
+import { setEventId } from "@/lib/store/features/event/eventSlice"
 import api from "@/config/api"
 import { useRouter } from "next/navigation"
-
 
 const filters = ["Daily", "Weekly", "10 Days", "90 Days", "All Time"]
 
 export default function SpeakerSessions() {
   const router = useRouter()
-  const userId = useSelector((state: RootState) => state.user.userId)
+  const dispatch = useDispatch()
+  const exhibitorId = useSelector((state: RootState) => state.exhibitor.exhibitorId)
 
   const [events, setEvents] = useState<any[]>([])
   const [filteredEvents, setFilteredEvents] = useState<any[]>([])
@@ -23,10 +24,9 @@ export default function SpeakerSessions() {
   const [stats, setStats] = useState({ total: 0, ongoing: 0, scheduled: 0 })
 
   useEffect(() => {
-    if (!userId) return
+    if (!exhibitorId) return
     const fetchEvents = async () => {
       try {
-        const exhibitorId = localStorage.getItem("exhibitorId") || "2"
         const res = await api.get(`/exhibiteros/${exhibitorId}/sessions`)
         const data = Array.isArray(res.data.sessions) ? res.data.sessions : []
         setEvents(data)
@@ -43,7 +43,7 @@ export default function SpeakerSessions() {
       }
     }
     fetchEvents()
-  }, [userId])
+  }, [exhibitorId])
 
   useEffect(() => {
     let filtered = [...events]
@@ -103,19 +103,17 @@ export default function SpeakerSessions() {
     )
   }
 
-  const handleViewAll = (sessionId: number) => {
-    router.push(`/participants/SessionDetail/${sessionId}`)
+  const handleViewAll = (event: any) => {
+    dispatch(setEventId(event.eventId || event.id))
+    router.push(`/participants/SessionDetail1/${event.id}`)
   }
 
-  // Added missing function to avoid runtime error
   const handleSponsorClick = () => {
     router.push("/Exhibitors/detail")
   }
 
   return (
     <div className="p-6 md:p-10 min-h-screen font-sans">
-
-
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         <div className="flex-1 flex items-center justify-between p-6 gap-3 h-24 bg-[#FFEEEE] border border-[#D4D4D4] shadow-sm rounded-3xl">
           <div className="flex items-center gap-3">
@@ -224,10 +222,8 @@ export default function SpeakerSessions() {
           const now = new Date()
           const start = new Date(event.startTime)
           const end = new Date(event.endTime)
-
           let statusText = "Scheduled"
           let statusColor = "text-gray-600"
-
           if (now >= start && now <= end) {
             statusText = "Live"
             statusColor = "text-red-600"
@@ -235,7 +231,6 @@ export default function SpeakerSessions() {
             statusText = "Completed"
             statusColor = "text-green-600"
           }
-
           const formattedDate = start.toLocaleDateString("en-US", {
             year: "numeric",
             month: "short",
@@ -268,7 +263,7 @@ export default function SpeakerSessions() {
                   <div className="flex items-center space-x-2">
                     {event.speakers[0].file && (
                       <Image
-                        src={`/uploads/${event.speakers[0].file}.png`}
+                        src={event.speakers[0].file.startsWith("http") ? event.speakers[0].file : `/uploads/${event.speakers[0].file}.png`}
                         alt=""
                         width={24}
                         height={24}
@@ -311,7 +306,7 @@ export default function SpeakerSessions() {
 
               <button
                 className="w-full bg-[#9B2033] text-white py-2 text-sm rounded-md hover:bg-red-700 transition"
-                onClick={() => handleViewAll(event.id)}
+                onClick={() => handleViewAll(event)}
               >
                 View Details
               </button>

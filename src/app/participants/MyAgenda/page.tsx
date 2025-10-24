@@ -255,7 +255,7 @@ const fetchSessions = async () => {
                 <Link
                   href={
                     session?.sessionId
-                      ? `/participants/SessionDetail/${session.sessionId}`
+                      ? `/participants/SessionDetail1/${session.sessionId}`
                       : "#"
                   }
                   className="w-full"
