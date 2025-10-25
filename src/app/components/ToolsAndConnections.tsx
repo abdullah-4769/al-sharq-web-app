@@ -13,9 +13,24 @@ import {
 } from "react-icons/fa"
 
 const toolsSupport = [
-  { title: "QR Code Pass", desc: "Entry & check-in", icon: <FaQrcode className="text-xl text-gray-500" />, Link: "" },
-  { title: "Venue Maps", desc: "Navigation & locations", icon: <FaMapMarkedAlt className="text-xl text-pink-500" />, Link: "/participants/VeneueMaps" },
-  { title: "FAQ & Support", desc: "Help & guidance", icon: <FaQuestionCircle className="text-xl text-yellow-500" />, Link: "/participants/Faqs&Support" },
+  {
+    title: "QR Code Pass",
+    desc: "Entry & check-in",
+    icon: <FaQrcode className="text-xl text-gray-500" />,
+    Link: "",
+  },
+  {
+    title: "Venue Maps",
+    desc: "Navigation & locations",
+    icon: <FaMapMarkedAlt className="text-xl text-pink-500" />,
+    Link: "/participants/VeneueMaps",
+  },
+  {
+    title: "FAQ & Support",
+    desc: "Help & guidance",
+    icon: <FaQuestionCircle className="text-xl text-yellow-500" />,
+    Link: "/participants/Faqs&Support",
+  },
 ]
 
 type Toast = {
@@ -34,7 +49,7 @@ export default function DashboardPage() {
     api
       .get(`/participant-directory-opt-in-out/opted-in-in-event/${eventId}?userId=${userId}`)
       .then((res) => setParticipants(res.data))
-      .catch((err) => showToast("Failed to load participants", "error"))
+      .catch(() => showToast("Failed to load participants", "error"))
   }, [eventId, userId])
 
   const showToast = (message: string, type: Toast["type"]) => {
@@ -45,9 +60,7 @@ export default function DashboardPage() {
   const handleConnect = (participantId: number) => {
     api
       .post(`/connections/send`, { senderId: userId, receiverId: participantId })
-      .then((res) => {
-        showToast("Connection request sent successfully", "success")
-      })
+      .then(() => showToast("Connection request sent successfully", "success"))
       .catch((err) => {
         const msg =
           err?.response?.data?.message || "Failed to send connection request"
@@ -73,68 +86,83 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="p-8 relative">
-      {/* Toast popup */}
+    <div className="relative w-full">
       {toast && (
-        <div className={`absolute top-4 right-4 px-4 py-2 rounded shadow ${toastColor(toast.type)}`}>
+        <div
+          className={`absolute top-4 right-4 px-4 py-2 rounded shadow text-sm font-medium ${toastColor(
+            toast.type
+          )}`}
+        >
           {toast.message}
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row gap-6">
-        <section className="bg-white rounded-lg shadow p-6 md:p-8 flex-1">
-          <h2 className="text-base font-semibold text-black mb-4">Tools & Support</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full mt-4">
+        {/* Tools & Support */}
+        <section className="bg-white rounded-2xl shadow-md border border-gray-200 p-6 md:p-8 w-full">
+          <h2 className="text-lg font-semibold text-[#1F2937] mb-5">Tools & Support</h2>
           <div className="flex flex-col gap-4">
             {toolsSupport.map((tool, index) => (
-              <div key={index} className="flex items-center justify-between bg-white border border-gray-200 rounded-md px-8 py-7 hover:bg-gray-50 transition">
+              <div
+                key={index}
+                className="flex items-center justify-between bg-[#F9FAFB] border border-gray-200 rounded-xl px-6 py-5 hover:bg-white hover:border-[#9B2033] transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md"
+              >
                 <div className="flex items-center gap-3">
-                  {tool.icon}
+                  <div className="text-[#9B2033] text-xl">{tool.icon}</div>
                   <div>
-                    <p className="text-sm font-medium text-black">{tool.title}</p>
+                    <p className="text-sm font-semibold text-[#111827]">{tool.title}</p>
                     <p className="text-xs text-gray-500">{tool.desc}</p>
                   </div>
                 </div>
                 <Link href={tool.Link}>
-                  <FaArrowRight className="text-[#9B2033] text-2xl ml-auto" />
+                  <FaArrowRight className="text-[#9B2033] text-lg" />
                 </Link>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="bg-white rounded-lg shadow p-6 md:p-8 flex-1">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-base font-semibold text-black">Opted-in Participants</h2>
+        {/* Opted-in Participants */}
+        <section className="bg-white rounded-2xl shadow-md border border-gray-200 p-6 md:p-8 w-full">
+          <div className="flex justify-between items-center mb-5">
+            <h2 className="text-lg font-semibold text-[#1F2937]">Opted-in Participants</h2>
           </div>
 
           <div className="flex flex-col gap-4">
-            {participants.map((p) => (
-              <div key={p.id} className="flex items-center justify-between bg-white border border-gray-200 rounded-lg px-4 py-2 hover:bg-gray-50 transition">
-                <div className="flex items-center gap-3">
-                  {p.file ? (
-                    <img
-                      src={`/files/${p.file}`}
-                      alt={p.name}
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                      {p.name[0].toUpperCase()}
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-sm font-medium text-black">{p.name}</p>
-                    <p className="text-xs text-gray-500">{p.role}</p>
-                  </div>
-                </div>
-                <button
-                  className="text-red-500 text-sm font-semibold hover:underline"
-                  onClick={() => handleConnect(p.id)}
+            {participants.length > 0 ? (
+              participants.map((p) => (
+                <div
+                  key={p.id}
+                  className="flex items-center justify-between bg-[#F9FAFB] border border-gray-200 rounded-xl px-5 py-4 hover:bg-white hover:border-[#9B2033] transition-all duration-200 shadow-sm hover:shadow-md"
                 >
-                  Connect
-                </button>
-              </div>
-            ))}
+                  <div className="flex items-center gap-4">
+                    {p.file ? (
+                      <img
+                        src={`/files/${p.file}`}
+                        alt={p.name}
+                        className="w-12 h-12 rounded-full border border-gray-300 shadow-sm object-cover"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-gray-100 border border-gray-300 flex items-center justify-center text-sm font-semibold text-gray-700 shadow-sm">
+                        {p.name[0]?.toUpperCase()}
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-sm font-semibold text-[#111827]">{p.name}</p>
+                      <p className="text-xs text-gray-500">{p.role}</p>
+                    </div>
+                  </div>
+                  <button
+                    className="text-[#9B2033] text-sm font-semibold hover:underline"
+                    onClick={() => handleConnect(p.id)}
+                  >
+                    Connect
+                  </button>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-gray-500">No participants found yet</p>
+            )}
           </div>
         </section>
       </div>

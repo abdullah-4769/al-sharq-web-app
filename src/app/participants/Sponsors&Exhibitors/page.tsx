@@ -1,7 +1,7 @@
 "use client"
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
-import { FaArrowLeft, FaCrown, FaFilter, FaMedal, FaSearch } from 'react-icons/fa'
+import { FaArrowLeft, FaCrown, FaMedal } from 'react-icons/fa'
 import { FaMapLocationDot, FaShop } from 'react-icons/fa6'
 import { useSelector } from 'react-redux'
 import { RootState } from "@/lib/store/store"
@@ -57,181 +57,125 @@ const SponsorsExhibitorsPage: React.FC = () => {
   )
 
   return (
-    <div className="p-2 max-w-7xl mx-auto">
-      <div className="flex flex-col items-start justify-between mb-8">
-        <div className="flex items-center gap-4 mb-[50px]">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto relative">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-3">
+        <div className="flex items-center gap-3">
           <Link href="/participants/Home">
-            <FaArrowLeft className="text-red-800 w-[20px] h-[20px] cursor-pointer" />
+            <FaArrowLeft className="text-red-800 w-5 h-5 cursor-pointer" />
           </Link>
-          <h1 className="text-3xl font-bold text-black">Sponsors & Exhibitors</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-black">Sponsors & Exhibitors</h1>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center border border-gray-300 rounded-lg px-4 py-2 gap-2 w-80">
-            <FaSearch className="text-red-600" />
+        <div className="flex flex-wrap items-center gap-2 md:gap-3">
+          <div className="flex items-center border border-gray-300 rounded-lg px-2 py-1 gap-2 w-full sm:w-56 md:w-64">
             <input
               type="text"
               placeholder="Search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="outline-none text-black"
+              className="outline-none text-black w-full text-sm"
             />
           </div>
-          <button
-            onClick={() => setSelectedCategory('All')}
-            className={`px-6 py-2 rounded-lg font-medium ${
-              selectedCategory === 'All' ? 'bg-red-600 text-white' : 'border border-gray-300 text-black'
-            }`}
-          >
-            All
-          </button>
-          <button
-            onClick={() => setSelectedCategory('Gold Sponsor')}
-            className={`px-6 py-2 rounded-lg font-medium ${
-              selectedCategory === 'Gold Sponsor'
-                ? 'bg-red-600 text-white'
-                : 'border border-gray-300 text-black'
-            }`}
-          >
-            Gold Sponsors
-          </button>
-          <button
-            onClick={() => setSelectedCategory('Silver Sponsor')}
-            className={`px-6 py-2 rounded-lg font-medium ${
-              selectedCategory === 'Silver Sponsor'
-                ? 'bg-red-600 text-white'
-                : 'border border-gray-300 text-black'
-            }`}
-          >
-            Silver Sponsors
-          </button>
-          <button
-            onClick={() => setSelectedCategory('Exhibitor')}
-            className={`px-6 py-2 rounded-lg font-medium ${
-              selectedCategory === 'Exhibitor'
-                ? 'bg-red-600 text-white'
-                : 'border border-gray-300 text-black'
-            }`}
-          >
-            Exhibitors
-          </button>
-          <FaFilter className="text-red-600 cursor-pointer" />
+          {['All', 'Gold Sponsor', 'Silver Sponsor', 'Exhibitor'].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-3 md:px-5 py-1 md:py-2 rounded-lg font-medium text-sm ${
+                selectedCategory === cat ? 'bg-red-600 text-white' : 'border border-gray-300 text-black'
+              }`}
+            >
+              {cat === 'Gold Sponsor' ? 'Gold Sponsors' : cat === 'Silver Sponsor' ? 'Silver Sponsors' : cat}
+            </button>
+          ))}
         </div>
       </div>
 
+      {/* Gold Sponsors */}
       {goldSponsors.length > 0 && (
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <FaCrown className="text-yellow-500 w-6 h-6" />
-            <h2 className="text-2xl font-bold text-black">Gold Sponsors</h2>
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <FaCrown className="text-yellow-500 w-5 h-5" />
+            <h2 className="text-lg md:text-xl font-bold text-black">Gold Sponsors</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {goldSponsors.map((sponsor, index) => (
-              <div
-                key={sponsor.id}
-                className="bg-white border border-gray-300 rounded-2xl p-6 shadow-sm flex items-center gap-6"
-              >
-                <div
-                  className={`w-24 h-24 ${
-                    index === 0
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600'
-                      : 'bg-gradient-to-r from-purple-500 to-purple-600'
-                  } rounded-full flex items-center justify-center`}
-                >
-                  <span className="text-white font-bold text-lg">{sponsor.name.charAt(0)}</span>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2 text-black">{sponsor.name}</h3>
-                  <p className="text-black mb-4">{sponsor.description}</p>
-                  <div className="flex items-center gap-4">
-                    <Link href={sponsor.link || '/participants/SponsorsDetailsScreen'}>
-                      <button className="bg-red-600 text-white px-6 py-2 rounded-lg font-bold">
-                        Visit Booth
-                      </button>
-                    </Link>
-                    <Link href={`/participants/SponsorsDetailsScreen/${sponsor.id}`}>
-                      <button className="border border-gray-300 text-black px-6 py-2 rounded-lg">
-                        Learn More
-                      </button>
-                    </Link>
+              <Link href={`/participants/SponsorsDetailsScreen/${sponsor.id}`} key={sponsor.id}>
+                <div className="bg-white border border-gray-300 rounded-2xl p-3 sm:p-4 shadow-sm flex flex-col sm:flex-row gap-3 sm:gap-4 h-full cursor-pointer hover:shadow-md transition">
+                  <div
+                    className={`w-16 h-16 sm:w-20 sm:h-20 ${
+                      index === 0
+                        ? 'bg-gradient-to-r from-blue-500 to-blue-600'
+                        : 'bg-gradient-to-r from-purple-500 to-purple-600'
+                    } rounded-full flex items-center justify-center flex-shrink-0`}
+                  >
+                    <span className="text-white font-bold text-lg">{sponsor.name.charAt(0)}</span>
+                  </div>
+                  <div className="flex-1 flex flex-col justify-between">
+                    <h3 className="text-md md:text-lg font-semibold mb-1 text-black">{sponsor.name}</h3>
+                    <p className="text-black text-sm md:text-sm">{sponsor.description}</p>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
       )}
 
+      {/* Silver Sponsors */}
       {silverSponsors.length > 0 && (
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <FaMedal className="text-gray-400 w-6 h-6" />
-            <h2 className="text-2xl font-bold text-black">Silver Sponsors</h2>
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <FaMedal className="text-gray-400 w-5 h-5" />
+            <h2 className="text-lg md:text-xl font-bold text-black">Silver Sponsors</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {silverSponsors.map((sponsor, index) => (
-              <div
-                key={sponsor.id}
-                className="bg-white border border-gray-300 rounded-2xl p-6 shadow-sm flex items-center gap-6"
-              >
-                <div
-                  className={`w-24 h-24 ${
-                    index === 0
-                      ? 'bg-gradient-to-r from-green-500 to-green-600'
-                      : 'bg-gradient-to-r from-orange-500 to-orange-600'
-                  } rounded-full flex items-center justify-center`}
-                >
-                  <span className="text-white font-bold text-lg">{sponsor.name.charAt(0)}</span>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2 text-black">{sponsor.name}</h3>
-                  <p className="text-black mb-4">{sponsor.description}</p>
-                  <div className="flex items-center gap-4">
-                    <Link href={sponsor.link || '/participants/SponsorsDetailsScreen'}>
-                      <button className="bg-red-600 text-white px-6 py-2 rounded-lg font-bold">
-                        Visit Booth
-                      </button>
-                    </Link>
-                    <Link href={`/participants/SponsorsDetailsScreen/${sponsor.id}`}>
-                      <button className="border border-gray-300 text-black px-6 py-2 rounded-lg">
-                        Learn More
-                      </button>
-                    </Link>
+              <Link href={`/participants/SponsorsDetailsScreen/${sponsor.id}`} key={sponsor.id}>
+                <div className="bg-white border border-gray-300 rounded-2xl p-3 sm:p-4 shadow-sm flex flex-col sm:flex-row gap-3 sm:gap-4 h-full cursor-pointer hover:shadow-md transition">
+                  <div
+                    className={`w-16 h-16 sm:w-20 sm:h-20 ${
+                      index === 0
+                        ? 'bg-gradient-to-r from-green-500 to-green-600'
+                        : 'bg-gradient-to-r from-orange-500 to-orange-600'
+                    } rounded-full flex items-center justify-center flex-shrink-0`}
+                  >
+                    <span className="text-white font-bold text-lg">{sponsor.name.charAt(0)}</span>
+                  </div>
+                  <div className="flex-1 flex flex-col justify-between">
+                    <h3 className="text-md md:text-lg font-semibold mb-1 text-black">{sponsor.name}</h3>
+                    <p className="text-black text-sm md:text-sm">{sponsor.description}</p>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
       )}
 
+      {/* Exhibitors */}
       {exhibitors.length > 0 && (
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <FaShop className="text-green-500 w-6 h-6" />
-            <h2 className="text-2xl font-bold text-black">Exhibitors</h2>
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <FaShop className="text-green-500 w-5 h-5" />
+            <h2 className="text-lg md:text-xl font-bold text-black">Exhibitors</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {exhibitors.map((exhibitor, index) => {
               const colors = ['bg-[#FF8A65]', 'bg-[#4DB6AC]', 'bg-[#9575CD]', 'bg-[#EC4899]']
               const colorClass = colors[index % colors.length]
               return (
                 <Link href={`/participants/ExhibitorsDetailsScreen/${exhibitor.id}`} key={exhibitor.id}>
-                  <div className="w-full bg-white border border-gray-300 rounded-2xl p-6 shadow-sm hover:shadow-md transition duration-200 cursor-pointer flex flex-col justify-between h-[200px]">
-                    <div className="flex items-center gap-4 mb-2">
-                      <div
-                        className={`w-10 h-10 ${colorClass} rounded-full flex items-center justify-center`}
-                      >
+                  <div className="w-full bg-white border border-gray-300 rounded-2xl p-3 sm:p-4 shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between h-full">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className={`w-10 h-10 ${colorClass} rounded-full flex items-center justify-center flex-shrink-0`}>
                         <span className="text-white font-bold text-md">{exhibitor.name.charAt(0)}</span>
                       </div>
-                      <h3 className="text-lg font-semibold text-black">{exhibitor.name}</h3>
+                      <h3 className="text-sm md:text-md font-semibold text-black">{exhibitor.name}</h3>
                     </div>
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-1 mb-1 text-xs md:text-sm">
                       <FaMapLocationDot className="text-red-500" />
-                      <span className="text-sm font-semibold text-black">
-                        {exhibitor.location}
-                      </span>
+                      <span className="font-semibold text-black">{exhibitor.location}</span>
                     </div>
-                    <p className="text-sm text-black">{exhibitor.description}</p>
+                    <p className="text-xs md:text-sm text-black">{exhibitor.description}</p>
                   </div>
                 </Link>
               )
@@ -240,7 +184,9 @@ const SponsorsExhibitorsPage: React.FC = () => {
         </div>
       )}
 
-      <Image src="/images/line.png" alt="Line" width={1360} height={127} className="absolute mr-5 " />
+      <div className="mt-6">
+        <Image src="/images/line.png" alt="Line" width={1360} height={127} className="w-full" />
+      </div>
     </div>
   )
 }

@@ -55,30 +55,30 @@ export default function SpeakersPage() {
 
   return (
     <>
-      <div className="flex flex-col gap-10 p-5 max-w-7xl mx-auto">
-        <div className="flex items-center gap-10">
+      <div className="flex flex-col gap-6 p-4 max-w-5xl mx-auto">
+        <div className="flex items-center gap-6">
           <Link href="/participants/Home">
-            <FaArrowLeft className="text-red-800 w-[20px] h-[20px] cursor-pointer" />
+            <FaArrowLeft className="text-red-800 w-5 h-5 cursor-pointer" />
           </Link>
-          <h1 className="text-2xl font-medium text-gray-900">Speakers</h1>
+          <h1 className="text-xl font-medium text-gray-900">Speakers</h1>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-3 border border-gray-300 rounded-lg p-3 w-1/2">
-            <FaSearch className="text-red-500 w-[20px] h-[20px]" />
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 border border-gray-300 rounded-lg p-2 w-1/2 min-w-[150px]">
+            <FaSearch className="text-red-500 w-4 h-4" />
             <input
               type="text"
               placeholder="Search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 outline-none text-gray-400"
+              className="flex-1 outline-none text-gray-400 text-sm"
             />
           </div>
           {["All", "Expert", "Keynote", "Technology", "Workshop"].map((tag) => (
             <button
               key={tag}
               onClick={() => setActiveFilter(tag)}
-              className={`px-6 py-3 rounded-lg ${activeFilter === tag
+              className={`px-4 py-2 rounded-lg text-sm ${activeFilter === tag
                 ? "bg-red-700 text-white font-bold"
                 : "border border-gray-300 text-gray-900"
                 }`}
@@ -86,16 +86,16 @@ export default function SpeakersPage() {
               {tag}
             </button>
           ))}
-          <div className="border border-gray-300 rounded-lg p-3">
-            <FaFilter className="text-red-500 w-[20px]" />
+          <div className="border border-gray-300 rounded-lg p-2">
+            <FaFilter className="text-red-500 w-4 h-4" />
           </div>
         </div>
 
-        <p className="text-lg font-medium text-gray-900">
+        <p className="text-md font-medium text-gray-900">
           {filteredSpeakers.length} Speakers Showing
         </p>
 
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
           {filteredSpeakers.map((speaker, index) => (
             <Link
               key={index}
@@ -103,28 +103,34 @@ export default function SpeakersPage() {
               onClick={() => dispatch(setSpeakerId(speaker.id))}
               className="block"
             >
-              <div className="bg-white border border-gray-300 rounded-2xl p-6 shadow-sm hover:shadow-md transition">
-                <div className="flex gap-6">
-                  <img
-                    src={`http://localhost:5000/files/${speaker.user.file}`}
-                    alt={speaker.user.name}
-                    className="w-24 h-24 rounded-full object-cover"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-4 flex-wrap">
-                      <h2 className="text-xl font-semibold text-gray-900">
+              <div className="bg-white border border-gray-300 rounded-xl p-4 shadow-sm hover:shadow-md transition">
+                <div className="flex gap-4 flex-wrap">
+                  {speaker.user.file ? (
+                    <img
+                      src={speaker.user.file}
+                      alt={speaker.user.name}
+                      className="w-16 h-16 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs font-medium">
+                      No Image
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-[150px]">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <h2 className="text-lg font-semibold text-gray-900">
                         {speaker.user.name}
                       </h2>
                       {speaker.designations.map((d: string, i: number) => (
-                        <div key={i} className="flex items-center gap-2">
+                        <div key={i} className="flex items-center gap-1">
                           <div className="w-1 h-1 bg-red-700 rounded-full" />
-                          <p className="text-base text-gray-900">{d}</p>
+                          <p className="text-sm text-gray-900">{d}</p>
                         </div>
                       ))}
-                      <div className="ml-auto flex gap-2 flex-wrap">
+                      <div className="ml-auto flex gap-1 flex-wrap">
                         {speaker.tags[0] && (
                           <span
-                            className={`px-3 py-1 rounded-full text-sm font-medium ${tagColors[speaker.tags[0]] ?? "bg-gray-200 text-gray-800"
+                            className={`px-2 py-0.5 rounded-full text-xs font-medium ${tagColors[speaker.tags[0]] ?? "bg-gray-200 text-gray-800"
                               }`}
                           >
                             {speaker.tags[0]}
@@ -132,14 +138,14 @@ export default function SpeakersPage() {
                         )}
                       </div>
 
-                      <div className="bg-red-200 p-2 rounded-full">
-                        <p className="text-sm text-red-700">
+                      <div className="bg-red-200 p-1 rounded-full">
+                        <p className="text-xs text-red-700">
                           {speaker.sessionCount} Sessions
                         </p>
                       </div>
                     </div>
 
-                    <p className="text-sm text-gray-600 leading-relaxed">
+                    <p className="text-xs text-gray-600 leading-relaxed">
                       {speaker.bio}
                     </p>
                   </div>
@@ -153,8 +159,8 @@ export default function SpeakersPage() {
       <Image
         src="/images/line.png"
         alt="Line"
-        width={1450}
-        height={127}
+        width={1200}
+        height={100}
         className="absolute"
       />
     </>

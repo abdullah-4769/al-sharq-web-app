@@ -130,95 +130,110 @@ export default function Home() {
   }, [eventId]);
 
   return (
-    <main className="min-h-screen bg-gray-100">
-
-      <div className="max-w-7xl mx-auto px-4 py-6">
-
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="w-12 h-12 border-4 border-gray-300 border-t-red-700 rounded-full animate-spin"></div>
-          </div>
-        ) : emptyMessage ? (
-          <div className="flex justify-center items-center h-64">
-            <p className="text-black text-lg font-medium">{emptyMessage}</p>
-          </div>
-        ) : (
-          <>
-            {banners.map((banner, index) => {
-              const bgColor = banner.bgColor;
-              const textColor = banner.textColor;
-              const buttonColor = banner.buttonColor;
-
-              return (
-                <div
-                  key={index}
-                  className={`${bgColor} p-1 md:py-4 md:px-8 rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center mb-4`}
-                >
-                  <div>
-                    <span className="bg-[#9E9E5C] text-white px-4 py-1 rounded-full text-xs md:text-sm font-semibold">
-                      {banner.type}
-                    </span>
-                    <p className={`mt-2 text-lg md:text-xl font-bold ${textColor}`}>
-                      {banner.category} start at {banner.startTime && banner.endTime ? ` ${banner.startTime} ` : ""}
-                    </p>
-                    <p className={`text-sm ${textColor}`}>
-                      {banner.subtitle} - {motivationalLines[index % motivationalLines.length]}
-                    </p>
-                  </div>
-                  <Link href={`/participants/SessionDetail1/${banner.sessionId}`}>
-                    <button className={`mt-4 md:mt-0 ${buttonColor} text-xl`}>
-                      <FaArrowRight />
-                    </button>
-                  </Link>
-                </div>
-              )
-            })}
-
-            <div className="flex justify-between items-center mb-4 px-2 md:px-4">
-              <h2 className="text-lg md:text-xl font-semibold text-black">Today's Schedule</h2>
-              <p className="text-black hover:text-red-700 text-sm md:text-base font-medium cursor-pointer">
-                <Link href={"/participants/ViewAllSessions"}>View All</Link>
-              </p>
-            </div>
-
-            <div className="mb-8 space-y-4">
-              {nextSessions.map((session, index) => (
-                <div key={index} className="bg-white p-4 md:p-6 rounded-xl shadow flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-0 max-w-full border border-gray-300">
-                  <div className="p-2">
-                    <p className="text-black text-center text-xs md:text-md font-semibold">Next</p>
-                    <p className="text-red-700 text-xl text-center md:text-sm font-bold leading-tight">{session.startTime}</p>
-                  </div>
-                  <div className="flex-1 md:px-4">
-                    <p className="font-semibold text-black">{session.category}</p>
-                    <p className="text-sm text-gray-600">{session.location}</p>
-                  </div>
-                  <Link href={`/event/${session.sessionId}`}>
-                    <button className={`mt-4 md:mt-0 text-red-800 text-xl`}>
-                      <FaArrowRight />
-                    </button>
-                  </Link>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-8">
-              <QuickAccess />
-            </div>
-            <div className="mt-8">
-              <ToolsAndConnections />
-            </div>
-          </>
-        )}
-
+<main className="min-h-screen bg-gray-100">
+  <div className="max-w-7xl mx-auto px-4 py-8 space-y-10">
+    {loading ? (
+      <div className="flex justify-center items-center h-64">
+        <div className="w-12 h-12 border-4 border-gray-300 border-t-red-700 rounded-full animate-spin"></div>
       </div>
+    ) : emptyMessage ? (
+      <div className="flex justify-center items-center h-64">
+        <p className="text-black text-lg font-medium">{emptyMessage}</p>
+      </div>
+    ) : (
+      <>
+        {/* Banners Section */}
+      <div className="space-y-4">
+  {banners.map((banner, index) => {
+    const { bgColor, textColor } = banner;
+    return (
+      <div
+        key={index}
+        className={`${bgColor} rounded-2xl shadow-md p-6 flex flex-col md:flex-row justify-between items-start md:items-center transition-all duration-200 hover:shadow-lg`}
+      >
+        <div className="space-y-2">
+          <span className="bg-[#9E9E5C] text-white px-4 py-1 rounded-full text-xs font-semibold">
+            {banner.type}
+          </span>
+          <h3 className={`text-xl font-bold ${textColor}`}>
+            {banner.category} start at{" "}
+            {banner.startTime && banner.endTime ? banner.startTime : ""}
+          </h3>
+          <p className={`text-sm ${textColor}`}>
+            {banner.subtitle} -{" "}
+            {motivationalLines[index % motivationalLines.length]}
+          </p>
+        </div>
 
-      <Image
-        src="/images/line.png"
-        alt="Line"
-        width={1450}
-        height={127}
-        className="w-full h-auto mt-10"
-      />
-    </main>
+        <Link href={`/participants/SessionDetail1/${banner.sessionId}`}>
+          <button className="text-red-700 hover:text-red-800 cursor-pointer transition">
+            <FaArrowRight className="text-xl" />
+          </button>
+        </Link>
+      </div>
+    );
+  })}
+</div>
+
+
+        {/* Schedule Header */}
+        <div className="flex justify-between items-center border-b border-gray-300 pb-2">
+          <h2 className="text-xl font-semibold text-black">Today's Schedule</h2>
+          <Link
+            href="/participants/ViewAllSessions"
+            className="text-red-700 text-sm font-medium hover:underline"
+          >
+            View All
+          </Link>
+        </div>
+
+        {/* Next Sessions */}
+       <div className="space-y-4">
+  {nextSessions.map((session, index) => (
+    <div
+      key={index}
+      className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 flex items-center justify-between hover:shadow-md transition w-full"
+    >
+      <div className="flex items-center gap-4">
+        <div className="text-center">
+          <p className="text-gray-500 text-xs font-semibold">Next</p>
+          <p className="text-red-700 text-lg font-bold">
+            {session.startTime}
+          </p>
+        </div>
+        <div>
+          <p className="font-semibold text-black">{session.category}</p>
+          <p className="text-sm text-gray-600">{session.location}</p>
+        </div>
+      </div>
+      <Link href={`/participants/SessionDetail1/${session.sessionId}`}>
+        <button className="text-red-700 hover:text-red-800">
+          <FaArrowRight className="text-xl  cursor-pointer" />
+        </button>
+      </Link>
+    </div>
+  ))}
+</div>
+
+
+        {/* Other Sections */}
+       <div className="">
+  <QuickAccess />
+  <ToolsAndConnections />
+</div>
+
+      </>
+    )}
+  </div>
+
+  <Image
+    src="/images/line.png"
+    alt="Line"
+    width={1450}
+    height={127}
+    className="w-full h-auto mt-12"
+  />
+</main>
+
   );
 }
